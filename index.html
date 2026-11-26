@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="theme-color" content="#142d27">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="두더지 헌터">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icon-192.png">
+<title>픽셀 두더지 헌터</title>
+<style>
+:root{color-scheme:dark;--bg:#10251f;--panel:#1a3930;--mint:#bdf5c9;--lime:#a5ed91;--hole:#0c1d19}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;min-height:100%;background:var(--bg);font-family:system-ui,-apple-system,sans-serif;color:#f3fff4;overscroll-behavior:none}
+body{padding:env(safe-area-inset-top) 16px env(safe-area-inset-bottom);display:flex;justify-content:center}
+.app{width:min(100%,470px);min-height:100dvh;display:flex;flex-direction:column;padding:20px 0 18px;gap:16px}
+header{text-align:center;padding-top:8px}
+.kicker{font-size:11px;letter-spacing:4px;color:#8db9a1;font-weight:800}
+h1{font-size:clamp(27px,8vw,38px);margin:5px 0 0;letter-spacing:-1.5px;color:var(--mint);text-shadow:3px 3px 0 #315d4b}
+.stats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:9px}
+.stat{background:var(--panel);border:2px solid #315b4b;border-radius:13px;padding:11px 8px;text-align:center}
+.stat small{display:block;font-size:10px;color:#9fc8ac;letter-spacing:1.5px;font-weight:800}
+.stat strong{display:block;font-size:25px;margin-top:2px;font-variant-numeric:tabular-nums}
+.arena{background:#18372e;border:3px solid #426c56;border-radius:19px;padding:15px 12px 17px;box-shadow:0 7px 0 #0a1915}
+.status{text-align:center;color:#c9f7d0;font-weight:750;min-height:28px;margin:0 0 12px;font-size:14px}
+.board{display:grid;grid-template-columns:repeat(3,1fr);gap:11px}
+.hole{position:relative;aspect-ratio:1/1;border:0;border-radius:15px;background:#315b48;box-shadow:inset 0 -6px 0 #234735;display:grid;place-items:center;overflow:hidden;touch-action:manipulation}
+.hole:active{transform:scale(.96)}
+.hole .pit{position:absolute;width:76%;height:32%;bottom:13%;border-radius:50%;background:var(--hole);box-shadow:inset 0 5px 0 #07130f}
+.mole{position:absolute;bottom:21%;font-size:clamp(43px,13vw,62px);line-height:1;filter:drop-shadow(2px 3px 0 #18251e);animation:pop .12s ease-out;z-index:2}
+@keyframes pop{from{transform:translateY(22px) scale(.7)}to{transform:translateY(0) scale(1)}}
+.hole .spark{position:absolute;top:13%;right:16%;font-size:19px;z-index:3}
+.controls{display:flex;gap:10px}
+button{font:inherit;cursor:pointer}
+.primary{flex:1;border:0;border-radius:14px;padding:15px;background:var(--lime);color:#173025;font-weight:900;font-size:17px;box-shadow:0 4px 0 #5d9a55}
+.secondary{border:2px solid #527762;background:#1b3b31;color:#eaffeb;border-radius:14px;padding:12px 15px;font-weight:750}
+.primary:active,.secondary:active{transform:translateY(2px);box-shadow:none}
+.help{background:#18342b;border:1px solid #315746;border-radius:14px;padding:13px 15px;color:#b7d9c0;font-size:12px;line-height:1.65}
+.help b{color:#e8ffe9}
+.overlay{position:fixed;inset:0;background:#07130fd9;display:grid;place-items:center;padding:24px;z-index:10}
+.modal{width:min(100%,370px);background:#1b3b31;border:3px solid #5c8969;border-radius:22px;padding:25px 20px;text-align:center;box-shadow:0 10px 0 #081711}
+.modal .emoji{font-size:56px}.modal h2{margin:5px 0;color:var(--mint);font-size:27px}.modal p{color:#c4e5ca;line-height:1.6;font-size:14px}
+.hidden{display:none!important}
+footer{text-align:center;color:#668d76;font-size:10px;margin-top:auto;padding-top:2px}
+</style>
+</head>
+<body>
+<main class="app">
+<header><div class="kicker">PIXEL ARCADE · MINI GAME</div><h1>🐹 두더지 헌터</h1></header>
+<section class="stats">
+ <div class="stat"><small>SCORE</small><strong id="score">0</strong></div>
+ <div class="stat"><small>TIME</small><strong id="time">30</strong></div>
+ <div class="stat"><small>BEST</small><strong id="best">0</strong></div>
+</section>
+<section class="arena">
+ <p class="status" id="status">시작 버튼을 누르고 두더지를 잡아봐!</p>
+ <div class="board" id="board" aria-label="두더지 게임판"></div>
+</section>
+<div class="controls">
+ <button class="primary" id="start">게임 시작</button>
+ <button class="secondary" id="sound" aria-label="소리 켜기 끄기">🔊</button>
+</div>
+<section class="help"><b>게임 방법</b><br>• 30초 동안 나타나는 두더지를 빠르게 터치하세요.<br>• 두더지를 잡으면 +100점, 놓쳐도 감점은 없어요.<br>• 최고 점수는 이 기기에 저장됩니다.</section>
+<footer>OFFLINE READY · PIXEL MOLE HUNTER</footer>
+</main>
+<div class="overlay" id="overlay">
+ <div class="modal"><div class="emoji">🐹</div><h2>두더지 헌터</h2><p>30초 동안 두더지를 잡아<br>최고 점수에 도전해 보세요!</p><button class="primary" id="begin">플레이하기</button></div>
+</div>
+<script>
+const board=document.getElementById('board'),scoreEl=document.getElementById('score'),timeEl=document.getElementById('time'),bestEl=document.getElementById('best'),statusEl=document.getElementById('status'),startBtn=document.getElementById('start'),overlay=document.getElementById('overlay');
+let score=0,time=30,active=-1,running=false,timer=null,spawn=null,sound=true,audioCtx=null;
+let best=Number(localStorage.getItem('moleBest')||0);bestEl.textContent=best;
+const holes=[];
+for(let i=0;i<9;i++){const b=document.createElement('button');b.className='hole';b.setAttribute('aria-label',`구멍 ${i+1}`);b.innerHTML='<span class="pit"></span>';b.addEventListener('pointerdown',()=>hit(i));board.appendChild(b);holes.push(b)}
+function beep(freq=620,dur=.07){if(!sound)return;try{audioCtx ||= new (window.AudioContext||window.webkitAudioContext)();const o=audioCtx.createOscillator(),g=audioCtx.createGain();o.frequency.value=freq;o.type='square';g.gain.value=.035;o.connect(g);g.connect(audioCtx.destination);o.start();o.stop(audioCtx.currentTime+dur)}catch(e){}}
+function clearMole(){holes.forEach(h=>h.querySelectorAll('.mole,.spark').forEach(x=>x.remove()));active=-1}
+function showMole(){clearMole();active=Math.floor(Math.random()*9);const m=document.createElement('span');m.className='mole';m.textContent=Math.random()<.12?'🐰':'🐹';holes[active].appendChild(m);if(Math.random()<.35){const s=document.createElement('span');s.className='spark';s.textContent='✦';holes[active].appendChild(s)}}
+function hit(i){if(!running||i!==active)return;score+=100;scoreEl.textContent=score;statusEl.textContent='정확해! +100점 ✨';beep(780);showMole()}
+function endGame(){running=false;clearInterval(timer);clearInterval(spawn);clearMole();startBtn.textContent='다시 하기';statusEl.textContent=`게임 종료! ${score}점을 획득했어.`;if(score>best){best=score;localStorage.setItem('moleBest',best);bestEl.textContent=best}overlay.querySelector('.emoji').textContent='🏆';overlay.querySelector('h2').textContent='게임 종료!';overlay.querySelector('p').innerHTML=`최종 점수 <b>${score}점</b><br>최고 점수 ${best}점`;overlay.querySelector('button').textContent='다시 도전';overlay.classList.remove('hidden')}
+function begin(){overlay.classList.add('hidden');score=0;time=30;running=true;scoreEl.textContent=score;timeEl.textContent=time;statusEl.textContent='나타나는 두더지를 터치해!';startBtn.textContent='게임 진행 중';showMole();timer=setInterval(()=>{time--;timeEl.textContent=time;if(time<=0)endGame()},1000);spawn=setInterval(showMole,850)}
+function showIntro(){overlay.classList.remove('hidden')}
+startBtn.addEventListener('click',()=>{if(!running)begin()});document.getElementById('begin').addEventListener('click',begin);
+document.getElementById('sound').addEventListener('click',e=>{sound=!sound;e.currentTarget.textContent=sound?'🔊':'🔇';e.currentTarget.setAttribute('aria-label',sound?'소리 끄기':'소리 켜기')});
+if('serviceWorker' in navigator && location.protocol!=='file:'){window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(()=>{}))}
+</script>
+</body></html>
